@@ -18,15 +18,31 @@ the bird sang a song.
 """
 
 # Preprocess text
-words = text.lower().replace(".", "").split()
-vocab = list(set(words))
-word2idx = {w: i for i, w in enumerate(vocab)}
-idx2word = {i: w for w, i in word2idx.items()}
-data = [word2idx[w] for w in words]
+def prepare_data():
+    words = text.lower().replace(".", "").split()
+    vocab = list(set(words))
+    word2idx = {w: i for i, w in enumerate(vocab)}
+    idx2word = {i: w for w, i in word2idx.items()}
+    data = [word2idx[w] for w in words]
 
-print(data[:10])
+    seq_len = 2
+
+    X = []
+    Y= []
+
+    for i in range(len(data) - seq_len):
+        X.append(data[i:i+seq_len])
+        Y.append(data[i+seq_len])
+
+    X = torch.tensor(X)
+    Y = torch.tensor(Y)
 
 # Neural network
+def create_model(vocab_size):
+    emb = nn.Embedding(vocab_size, 8)
+    lstm = nn.LSTM(8, 16, batch_first=True)
+    fc = nn.Linear(16, vocab_size)
+    return emb, lstm, fc
 
 # Training function
 
