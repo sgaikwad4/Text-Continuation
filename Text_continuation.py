@@ -17,9 +17,14 @@ the dog barked at the mailman.
 the bird sang a song.
 """
 
-# Spliting sentences into individual words
+# Preprocess text
 words = text.lower().replace(".", "").split()
-print(words)
+vocab = list(set(words))
+word2idx = {w: i for i, w in enumerate(vocab)}
+idx2word = {i: w for w, i in word2idx.items()}
+data = [word2idx[w] for w in words]
+
+print(data[:10])
 
 # Neural network
 
