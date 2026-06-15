@@ -36,6 +36,8 @@ def prepare_data():
 
     X = torch.tensor(X)
     Y = torch.tensor(Y)
+    
+    return X, Y, word2idx, idx2word
 
 # Neural network
 def create_model(vocab_size):
@@ -48,16 +50,13 @@ def create_model(vocab_size):
 def forward(x, emb, lstm, fc):
     x = emb(x)
     output, (hidden, cell) = lstm(x)
-
-    # Last layer hidden state
-    x = fc(hidden[-1])
-
-    return x
+    return fc(hidden[-1])
 
 # Training function
-def train_model(X, Y, emb, lstm, fc, epochs=300):
-    criterion = nn.CrossEntropyLoss()
+def train_model(model, X, Y, epochs=300):
+    emb, lstm, fc = model
 
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(
         list(emb.parameters()) +
         list(lstm.parameters()) +
@@ -75,4 +74,48 @@ def train_model(X, Y, emb, lstm, fc, epochs=300):
         optimizer.step()
         
 # Sentence completion
+def predict_next(seed, model, word2idx, idx2word, max_len=5):
+    emb, lstm, fc = model
 
+    words = seed.lower().split()
+    words = [w for w in words if w in word2idx]
+
+    if not words:
+        return ""
+
+    for _ in range(max_len):
+        context = words[-2:]
+        x = torch.tensor([[word2idx[w] for w in context]])
+
+        with torch.no_grad():
+            output = forward(x, emb, lstm, fc)
+            pred = torch.argmax(output, dim=1).item()
+            next_word = idx2word[pred]
+
+        words.append(next_word)
+
+    return " ".join(words)
+
+# Enter sentence chat
+def chat(model, word2idx, idx2word):
+    while True:
+        s = input("Enter a starting phrase: ")
+        if s.lower() == "quit":
+            break
+
+        sentence = predict_next(s, model, word2idx, idx2word)
+        print("Generated:", sentence)
+        
+if __name__ == "__main__":
+    X, Y, w2i, i2w = prepare_data()
+
+    model = create_model(len(w2i))
+
+    train_model(model, X, Y)
+
+    chat(model, w2i, i2w)
+    
+    
+    
+    
+    
