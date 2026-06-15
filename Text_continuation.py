@@ -44,6 +44,16 @@ def create_model(vocab_size):
     fc = nn.Linear(16, vocab_size)
     return emb, lstm, fc
 
+# Forward pass
+def forward(x, emb, lstm, fc):
+    x = emb(x)
+    output, (hidden, cell) = lstm(x)
+
+    # Last layer hidden state
+    x = fc(hidden[-1])
+
+    return x
+
 # Training function
 def train_model(X, Y, emb, lstm, fc, epochs=300):
     criterion = nn.CrossEntropyLoss()
@@ -63,6 +73,6 @@ def train_model(X, Y, emb, lstm, fc, epochs=300):
 
         loss.backward()
         optimizer.step()
-
+        
 # Sentence completion
 
