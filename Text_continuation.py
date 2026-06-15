@@ -45,6 +45,24 @@ def create_model(vocab_size):
     return emb, lstm, fc
 
 # Training function
+def train_model(X, Y, emb, lstm, fc, epochs=300):
+    criterion = nn.CrossEntropyLoss()
+
+    optimizer = optim.Adam(
+        list(emb.parameters()) +
+        list(lstm.parameters()) +
+        list(fc.parameters()),
+        lr=0.01
+    )
+
+    for epoch in range(epochs):
+        optimizer.zero_grad()
+
+        outputs = forward(X, emb, lstm, fc)
+        loss = criterion(outputs, Y)
+
+        loss.backward()
+        optimizer.step()
 
 # Sentence completion
 
